@@ -1,53 +1,35 @@
 from django.shortcuts import render
 from django.http import JsonResponse
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from .models import Product, Review, Order, OrderItem, ShippingAddress
+from .serializers import ProductSerializer, ReviewSerializer, OrderSerializer, OrderItemSerializer, ShippingAddressSerializer
+from .products import products
 
 
+@api_view(['GET', 'POST'])
 def getRoutes(request):
-
     routes = [
         'api/products/',
         'api/products/upload/',
         'api/products/<id>/reviews/',
         'api/products/top/',
         'api/products/<id>/',
-
         'api/products/delete/<id>/',
         'api/products/<update>/<id>/',
     ]
+    return Response(routes)
 
-    return JsonResponse(routes, safe=False)
 
-
+@api_view(['GET'])
 def getProducts(request):
-    
-    products = [
-        {
-            'name': 'Product 1',
-            'price': 200,
-            'image': '/images/airpods.jpg',
-            'brand': 'Apple',
-            'rating': 4.5,
-            'numReviews': 10,
-            'countInStock': 6,
-        },
-        {
-            'name': 'Product 2',
-            'price': 250,
-            'image': '/images/phone.jpg',
-            'brand': 'Apple',
-            'rating': 4.0,
-            'numReviews': 10,
-            'countInStock': 6,
-        },
-        {
-            'name': 'Product 3',
-            'price': 250,
-            'image': '/images/camera.jpg',
-            'brand': 'Apple',
-            'rating': 4.8,
-            'numReviews': 17,
-            'countInStock': 6,
-        }
-    ]
+    products = Product.objects.all()
+    serializer = ProductSerializer(products, many=True)
+    return Response(serializer.data)
 
-    return JsonResponse(products, safe=False)
+
+@api_view(['GET'])
+def getProduct(request, pk):
+    product = Product.objects.get(_id=pk)
+    serializer = ProductSerializer(product, many=False)
+    return Response(serializer.data)
